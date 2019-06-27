@@ -1,8 +1,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <math.h>
+#include "stdio.h"
 #define MIN_SIZE 0
-#define MAX_SIZE 10^8
+#define MAX_SIZE pow(10,8)
 
 using namespace std;
 
@@ -50,27 +52,27 @@ Block AddNewBlock(size_t size) {
 void* malloc(size_t size) {
     //check input
     if (size <= MIN_SIZE || size > MAX_SIZE) {
-        return nullptr;
+        return NULL;
     }
 
     Block block;
     //if its the first call to malloc
-    if(!global_last_allocated) {
+    if(global_first_allocated == NULL) {
         block = AddNewBlock(size);
-        if (block == nullptr) {
-            return nullptr;
+        if (block == NULL) {
+            return NULL;
         }
         global_first_allocated = block;
     } else {
         block = FindFreeBlock(size);
         // if there is a freed block, unfree him, update the block info and return it
-        if (block != nullptr) {
+        if (block != NULL) {
             block->is_free = 0;
         // if there isn't any freed block, allocate a new one
         } else {
             block = AddNewBlock(size);
-            if (block == nullptr) {
-                return nullptr;
+            if (block == NULL) {
+                return NULL;
             }
         }
     }
