@@ -39,10 +39,10 @@ Block FindFreeBlock(size_t size) {
             !(curr->size >= size && curr->is_free)) { //TODO: check cond
         curr = curr->next;
     }
-
+    size_t aligmnentSize = size + MEM_LINE_LEN - size%MEM_LINE_LEN;
     if (curr != nullptr &&
-            curr->size - size - BLOCK_SIZE >= LARGE_ENOUGH_MEM) {
-        DivideLargeBlock(curr, size);
+            curr->size - aligmnentSize - BLOCK_SIZE >= LARGE_ENOUGH_MEM) {
+        DivideLargeBlock(curr, aligmnentSize);
     }
     // if all blocks do not fit and the last block is freed but not big enough
     // - make it bigger.
