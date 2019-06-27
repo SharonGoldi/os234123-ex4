@@ -13,12 +13,12 @@ struct block {
 };
 typedef struct block* Block;
 
-Block global_last_allocated = nullptr;
-Block global_first_allocated = nullptr;
+Block global_last_allocated = NULL;
+Block global_first_allocated = NULL;
 
 Block FindFreeBlock(size_t size) {
     Block curr = global_first_allocated;
-    while (curr != nullptr &&
+    while (curr != NULL &&
             !(curr->size >= size && curr->is_free)) {
         curr = curr->next;
     }
@@ -30,15 +30,15 @@ Block AddNewBlock(size_t size) {
     void* new_block = sbrk(size + sizeof(struct block));
 
     if (new_block == (void*) -1) {
-        return nullptr;
+        return NULL;
     }
 
-    if(global_last_allocated != nullptr) {
+    if(global_last_allocated != NULL) {
         global_last_allocated->next = block;
     }
 
     block->size = size;
-    block->next = nullptr;
+    block->next = NULL;
     block->is_free = 0;
     global_last_allocated = block;
 
@@ -79,7 +79,7 @@ void* malloc(size_t size) {
 }
 
 void free(void* p) {
-    if (p == nullptr) {
+    if (p == NULL) {
         return;
     }
 
@@ -89,8 +89,8 @@ void free(void* p) {
 
 void* calloc(size_t num, size_t size){
     void* p = malloc(num*size);
-    if (p == nullptr) {
-        return nullptr;
+    if (p == NULL) {
+        return NULL;
     }
 
     memset(p, 0, num*size);
@@ -100,9 +100,9 @@ void* calloc(size_t num, size_t size){
 void* realloc(void* oldp, size_t size) {
     // check input
     if (size <= MIN_SIZE || size > MAX_SIZE) {
-        return nullptr;
+        return NULL;
     }
-    if (oldp == nullptr) {
+    if (oldp == NULL) {
         return malloc(size);
     }
 
@@ -113,8 +113,8 @@ void* realloc(void* oldp, size_t size) {
     }
     // if the new size is bigger
     void* newp = malloc(size);
-    if (newp == nullptr) {
-        return nullptr;
+    if (newp == NULL) {
+        return NULL;
     }
 
     memcpy(newp, oldp, old_block->size);
@@ -125,7 +125,7 @@ void* realloc(void* oldp, size_t size) {
 size_t _num_free_blocks() {
     unsigned int num_free = 0;
     Block block = global_first_allocated;
-    while (block != nullptr) {
+    while (block != NULL) {
         if(block->is_free == 1) {
            num_free++;
         }
@@ -137,7 +137,7 @@ size_t _num_free_blocks() {
 size_t _num_free_bytes() {
     unsigned int num_free = 0;
     Block block = global_first_allocated;
-    while (block != nullptr) {
+    while (block != NULL) {
         if(block->is_free == 1) {
             num_free += block->size;
         }
@@ -149,7 +149,7 @@ size_t _num_free_bytes() {
 size_t _num_allocated_blocks() {
     unsigned int num_allocated = 0;
     Block block = global_first_allocated;
-    while (block != nullptr) {
+    while (block != NULL) {
         num_allocated++;
         block = block->next;
     }
@@ -159,7 +159,7 @@ size_t _num_allocated_blocks() {
 size_t _num_allocated_bytes() {
     unsigned int num_allocated = 0;
     Block block = global_first_allocated;
-    while (block != nullptr) {
+    while (block != NULL) {
         num_allocated += block->size;
         block = block->next;
     }
