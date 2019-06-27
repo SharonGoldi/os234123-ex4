@@ -4,4 +4,4 @@ project(os234123_ex4)
 set(CMAKE_CXX_STANDARD 11)
 
 add_executable(os234123_ex4
-        malloc_1.cpp)
+        malloc_3.cpp)
