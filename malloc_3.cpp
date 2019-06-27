@@ -4,7 +4,9 @@
 #define MIN_SIZE 0
 #define MAX_SIZE 10^8
 #define LARGE_ENOUGH_MEM 128
-#define BLOCK_SIZE sizeof(struct block)
+#define MEM_LINE_LEN 4
+#define BLOCK_SIZE sizeof(struct block) + MEM_LINE_LEN - sizeof(struct block)%MEM_LINE_LEN
+
 
 using namespace std;
 
@@ -46,6 +48,7 @@ Block FindFreeBlock(size_t size) {
     // - make it bigger.
     if (curr == nullptr && global_last_allocated->is_free == 1) {
         unsigned long diff = size - global_last_allocated->size;
+        diff = diff + MEM_LINE_LEN - diff%MEM_LINE_LEN;
         void* added = sbrk(diff);
 
         if (added == (void*) -1) {
@@ -60,9 +63,18 @@ Block FindFreeBlock(size_t size) {
 
 Block AddNewBlock(size_t size) {
     Block block = (Block)sbrk(0);
-    void* new_block = sbrk(size + BLOCK_SIZE);
+    
+    void* new_block = sbrk(BLOCK_SIZE);
 
     if (new_block == (void*) -1) {
+        return nullptr;
+    }
+
+    size_t data_alignment = MEM_LINE_LEN - size%MEM_LINE_LEN;
+    void* new_data = sbrk(size + data_alignment);
+    
+    if (new_data == (void*) -1) {
+        sbrk(-BLOCK_SIZE);
         return nullptr;
     }
 
@@ -70,7 +82,7 @@ Block AddNewBlock(size_t size) {
         global_last_allocated->next = block;
     }
 
-    block->size = size;
+    block->size = size + data_alignment;
     block->next = nullptr;
     block->prev = global_last_allocated;
     global_last_allocated = block;
@@ -124,8 +136,8 @@ void* malloc(size_t size) {
             }
         }
     }
-    // added 1 to jump a size of a block and jump over the metadata
-    return (block + 1);
+    // jump a size of a block and jump over the metadata
+    return (char *)block + BLOCK_SIZE;
 }
 
 void free(void* p) {
@@ -133,7 +145,7 @@ void free(void* p) {
         return;
     }
 
-    Block block = (Block)p - 1;
+    Block block = (Block)((char *)p - BLOCK_SIZE);
     block->is_free = 1;
 
     if (block->next != nullptr && block->next->is_free == 1) {
@@ -163,7 +175,7 @@ void* realloc(void* oldp, size_t size) {
         return malloc(size);
     }
 
-    Block old_block = (Block)oldp - 1;
+    Block old_block = (Block)((char *)oldp - BLOCK_SIZE);
     // if the new size is smaller - no need to realloc (wasteful but works)
     if (old_block->size >= size) {
         return oldp;
