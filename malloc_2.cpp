@@ -1,12 +1,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <math.h>
-#include "stdio.h"
 #define MIN_SIZE 0
-#define MAX_SIZE pow(10,8)
+#define MAX_SIZE 100000000
 
-using namespace std;
 
 struct block {
     size_t size;
